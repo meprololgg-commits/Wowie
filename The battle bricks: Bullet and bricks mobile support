@@ -6,8 +6,8 @@ local char = player.Character or player.CharacterAdded:Wait()
 if not player then return end
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "UI"
-screenGui.ResetOnSpawn = true
-screenGui.Parent = CoreGui 
+screenGui.ResetOnSpawn = false
+screenGui.Parent = CoreGui
 local plrteam = player.Team
 if not plrteam then
 	print("NO!")
@@ -96,20 +96,15 @@ local function fireAbility()
 		RemoteEvent:FireServer("Kick")
 	elseif tool.Name == "StunnerTool" then
 		local enemy, hitPart = findClosestEnemyWithRaycast()
-		if enemy then
-			local enemyChar = enemy.Character
-			if enemyChar then
-				local targetHRP = enemyChar:FindFirstChild("HumanoidRootPart")
-				if targetHRP then
-					RemoteEvent:FireServer("Shoot", hitPart)
-				end
+		if hitPart then
+			if hitPart then
+				RemoteEvent:FireServer("Shoot", hitPart)
 			end
 		else
 			print("No enemy in range!")
 		end
 	end
 end
-
 Button.MouseButton1Down:Connect(function()
 	isHolding = true
 	task.spawn(function()
