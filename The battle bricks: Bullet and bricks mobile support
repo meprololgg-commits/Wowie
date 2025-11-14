@@ -4,17 +4,14 @@ local UserInputService = game:GetService("UserInputService")
 local player = Players.LocalPlayer 
 local char = player.Character or player.CharacterAdded:Wait()
 if not player then return end
-
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "UI"
 screenGui.ResetOnSpawn = true
-screenGui.Parent = CoreGui
-
+screenGui.Parent = player.PlayerGui
 local plrteam = player.Team
 if not plrteam then
 	print("NO!")
 end
-
 local Button = Instance.new("TextButton")
 Button.Name = "Button"
 Button.Parent = screenGui
@@ -28,18 +25,13 @@ Button.TextSize = 24
 Button.BorderSizePixel = 0
 Button.AutoButtonColor = true
 Button.BackgroundTransparency = 0.5
-
 local ConerUi = Instance.new("UICorner")
 ConerUi.Parent = Button
-
 local isHolding = false
 local TARGETING_RANGE = 250
-
-
 player.CharacterAdded:Connect(function(newChar)
 	char = newChar
 end)
-
 local function isEnemyTeam(targetPlayer)
 	if not plrteam or not targetPlayer.Team then
 		return targetPlayer ~= player
@@ -47,63 +39,69 @@ local function isEnemyTeam(targetPlayer)
 	return targetPlayer.Team ~= plrteam
 end
 
-local function findClosestEnemy()
+local function findClosestEnemyWithRaycast()
 	local closestEnemy = nil
 	local closestDistance = TARGETING_RANGE
-
+	local hitPart = nil
 	local playerHRP = char:FindFirstChild("HumanoidRootPart")
-	if not playerHRP then return nil end
-
+	if not playerHRP then return nil, nil end
 	local playerPos = playerHRP.Position
-
+	local raycastParams = RaycastParams.new()
+	raycastParams.FilterType = Enum.RaycastFilterType.Exclude
+	local filterList = {char}
 	for _, targetPlayer in pairs(Players:GetPlayers()) do
-		if targetPlayer == player then continue end
-
-		if not isEnemyTeam(targetPlayer) then continue end
-
-		local targetChar = targetPlayer.Character
-		if not targetChar then continue end
-
-		local targetHRP = targetChar:FindFirstChild("HumanoidRootPart")
-		if not targetHRP then continue end
-
-		local targetHumanoid = targetChar:FindFirstChild("Humanoid")
-		if not targetHumanoid or targetHumanoid.Health <= 0 then continue end
-
-		local distance = (targetHRP.Position - playerPos).Magnitude
-
-		if distance < closestDistance then
-			closestDistance = distance
-			closestEnemy = targetPlayer
+		if targetPlayer ~= player and not isEnemyTeam(targetPlayer) then
+			if targetPlayer.Character then
+				table.insert(filterList, targetPlayer.Character)
+			end
 		end
 	end
-
-	return closestEnemy
+	raycastParams.FilterDescendantsInstances = filterList
+	for _, targetPlayer in pairs(Players:GetPlayers()) do
+		if targetPlayer == player then continue end
+		if not isEnemyTeam(targetPlayer) then continue end
+		local targetChar = targetPlayer.Character
+		if not targetChar then continue end
+		local targetHRP = targetChar:FindFirstChild("HumanoidRootPart")
+		if not targetHRP then continue end
+		local targetHumanoid = targetChar:FindFirstChild("Humanoid")
+		if not targetHumanoid or targetHumanoid.Health <= 0 then continue end
+		local distance = (targetHRP.Position - playerPos).Magnitude
+		if distance < closestDistance then
+			local direction = (targetHRP.Position - playerPos).Unit
+			local ray = workspace:Raycast(playerPos, direction * TARGETING_RANGE, raycastParams)
+			if ray and ray.Instance then
+				local hitCharacter = ray.Instance.Parent
+				if hitCharacter == targetChar then
+					closestDistance = distance
+					closestEnemy = targetPlayer
+					hitPart = ray.Instance
+				end
+			end
+		end
+	end
+	return closestEnemy, hitPart
 end
 
 local function fireAbility()
 	print("OK!")
-
 	if not char then return end
-
 	local tool = char:FindFirstChildOfClass("Tool")
 	if not tool then return end
-
 	local RemoteEvent = tool:FindFirstChildOfClass("RemoteEvent")
 	if not RemoteEvent then return end
-
 	if tool.Name == "BarbaricTool" then
 		RemoteEvent:FireServer("Charge")
 	elseif tool.Name == "SpartanTool" then
 		RemoteEvent:FireServer("Kick")
 	elseif tool.Name == "StunnerTool" then
-		local enemy = findClosestEnemy()
+		local enemy, hitPart = findClosestEnemyWithRaycast()
 		if enemy then
 			local enemyChar = enemy.Character
 			if enemyChar then
 				local targetHRP = enemyChar:FindFirstChild("HumanoidRootPart")
 				if targetHRP then
-					RemoteEvent:FireServer("Shoot", targetHRP)
+					RemoteEvent:FireServer("Shoot", hitPart)
 				end
 			end
 		else
@@ -121,20 +119,16 @@ Button.MouseButton1Down:Connect(function()
 		end
 	end)
 end)
-
 Button.MouseButton1Up:Connect(function()
 	isHolding = false
 end)
-
 task.spawn(function()
 	while true do
 		wait(0.08)
-
 		if not char then
 			Button.Text = "None"
 			continue
 		end
-
 		local tool = char:FindFirstChildOfClass("Tool")
 		if tool then
 			if tool.Name == "BarbaricTool" then
