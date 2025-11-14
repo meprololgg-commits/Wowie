@@ -103,7 +103,7 @@ local function fireAbility()
 			if enemyChar then
 				local targetHRP = enemyChar:FindFirstChild("HumanoidRootPart")
 				if targetHRP then
-					RemoteEvent:FireServer("Shoot", targetHRP.Position)
+					RemoteEvent:FireServer("Shoot", targetHRP)
 				end
 			end
 		else
