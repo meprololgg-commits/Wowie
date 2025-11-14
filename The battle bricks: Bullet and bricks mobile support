@@ -84,7 +84,6 @@ local function findClosestEnemyWithRaycast()
 end
 
 local function fireAbility()
-	print("OK!")
 	if not char then return end
 	local tool = char:FindFirstChildOfClass("Tool")
 	if not tool then return end
@@ -103,6 +102,8 @@ local function fireAbility()
 		else
 			print("No enemy in range!")
 		end
+	elseif tool.Name=="SpeedsterTool" then
+		tool:Activate()
 	end
 end
 Button.MouseButton1Down:Connect(function()
