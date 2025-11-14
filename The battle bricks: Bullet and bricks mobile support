@@ -7,7 +7,7 @@ if not player then return end
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "UI"
 screenGui.ResetOnSpawn = true
-screenGui.Parent = player.PlayerGui
+screenGui.Parent = CoreGui 
 local plrteam = player.Team
 if not plrteam then
 	print("NO!")
