@@ -3,11 +3,17 @@ local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
 local player = Players.LocalPlayer 
 local char = player.Character or player.CharacterAdded:Wait()
+if not player then return end
 
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "UI"
 screenGui.ResetOnSpawn = true
 screenGui.Parent = CoreGui
+
+local plrteam = player.Team
+if not plrteam then
+	print("NO!")
+end
 
 local Button = Instance.new("TextButton")
 Button.Name = "Button"
@@ -15,42 +21,71 @@ Button.Parent = screenGui
 Button.Text = "Ability"
 Button.Size = UDim2.new(0.094, 0, 0.147, 0)
 Button.Position = UDim2.new(0.877, 0, 0.549, 0) 
+Button.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+Button.Font = Enum.Font.SourceSansBold
+Button.TextSize = 24
+Button.BorderSizePixel = 0
+Button.AutoButtonColor = true
+Button.BackgroundTransparency = 0.5
 
-local CornerUi = Instance.new("UICorner")
-CornerUi.Parent = Button
+local ConerUi = Instance.new("UICorner")
+ConerUi.Parent = Button
 
 local isHolding = false
 local TARGETING_RANGE = 250
 
 
+player.CharacterAdded:Connect(function(newChar)
+	char = newChar
+end)
+
+local function isEnemyTeam(targetPlayer)
+	if not plrteam or not targetPlayer.Team then
+		return targetPlayer ~= player
+	end
+	return targetPlayer.Team ~= plrteam
+end
+
 local function findClosestEnemy()
 	local closestEnemy = nil
 	local closestDistance = TARGETING_RANGE
 
+	local playerHRP = char:FindFirstChild("HumanoidRootPart")
+	if not playerHRP then return nil end
+
+	local playerPos = playerHRP.Position
+
 	for _, targetPlayer in pairs(Players:GetPlayers()) do
 		if targetPlayer == player then continue end
-		if targetPlayer.Team == player.Team then continue end
+
+		if not isEnemyTeam(targetPlayer) then continue end
 
 		local targetChar = targetPlayer.Character
 		if not targetChar then continue end
 
-		local hrp = targetChar:FindFirstChild("HumanoidRootPart")
-		local myhrp = char:FindFirstChild("HumanoidRootPart")
+		local targetHRP = targetChar:FindFirstChild("HumanoidRootPart")
+		if not targetHRP then continue end
 
-		if hrp and myhrp then
-			local dist = (hrp.Position - myhrp.Position).Magnitude
-			if dist < closestDistance then
-				closestDistance = dist
-				closestEnemy = targetPlayer
-			end
+		local targetHumanoid = targetChar:FindFirstChild("Humanoid")
+		if not targetHumanoid or targetHumanoid.Health <= 0 then continue end
+
+		local distance = (targetHRP.Position - playerPos).Magnitude
+
+		if distance < closestDistance then
+			closestDistance = distance
+			closestEnemy = targetPlayer
 		end
 	end
 
 	return closestEnemy
 end
 
-
 local function fireAbility()
+	print("OK!")
+
+	if not char then return end
+
 	local tool = char:FindFirstChildOfClass("Tool")
 	if not tool then return end
 
@@ -59,16 +94,17 @@ local function fireAbility()
 
 	if tool.Name == "BarbaricTool" then
 		RemoteEvent:FireServer("Charge")
-
 	elseif tool.Name == "SpartanTool" then
 		RemoteEvent:FireServer("Kick")
-
 	elseif tool.Name == "StunnerTool" then
 		local enemy = findClosestEnemy()
-		if enemy and enemy.Character then
-			local hrp = enemy.Character:FindFirstChild("HumanoidRootPart")
-			if hrp then
-				RemoteEvent:FireServer("Shoot", hrp.Position)
+		if enemy then
+			local enemyChar = enemy.Character
+			if enemyChar then
+				local targetHRP = enemyChar:FindFirstChild("HumanoidRootPart")
+				if targetHRP then
+					RemoteEvent:FireServer("Shoot", targetHRP.Position)
+				end
 			end
 		else
 			print("No enemy in range!")
@@ -76,14 +112,12 @@ local function fireAbility()
 	end
 end
 
-
-
 Button.MouseButton1Down:Connect(function()
 	isHolding = true
 	task.spawn(function()
 		while isHolding do
 			fireAbility()
-			task.wait(0.1)
+			task.wait(0.1) 
 		end
 	end)
 end)
@@ -92,11 +126,14 @@ Button.MouseButton1Up:Connect(function()
 	isHolding = false
 end)
 
-
-
 task.spawn(function()
 	while true do
-		task.wait(0.08)
+		wait(0.08)
+
+		if not char then
+			Button.Text = "None"
+			continue
+		end
 
 		local tool = char:FindFirstChildOfClass("Tool")
 		if tool then
