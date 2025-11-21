@@ -104,6 +104,8 @@ local function fireAbility()
 		end
 	elseif tool.Name=="SpeedsterTool" then
 		tool:Activate()
+	elseif tool.Name=="CakeTool" or tool.Name=="PukeTool" then
+		RemoteEvent:FireServer("Ability")
 	end
 end
 Button.MouseButton1Down:Connect(function()
