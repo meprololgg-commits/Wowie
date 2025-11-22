@@ -88,7 +88,7 @@ local function fireAbility()
 	local tool = char:FindFirstChildOfClass("Tool")
 	if not tool then return end
 	local RemoteEvent = tool:FindFirstChildOfClass("RemoteEvent")
-	if not RemoteEvent then return end
+	if RemoteEvent then 
 	if tool.Name == "BarbaricTool" then
 		RemoteEvent:FireServer("Charge")
 	elseif tool.Name == "SpartanTool" then
@@ -102,12 +102,18 @@ local function fireAbility()
 		else
 			print("No enemy in range!")
 		end
-	elseif tool.Name=="SpeedsterTool" then
-		tool:Activate()
 	elseif tool.Name=="CakeTool" or tool.Name=="PukeTool" then
 		RemoteEvent:FireServer("Ability")
+		end
+	else
+	if tool.Name=="SpeedsterTool" then
+		tool:Activate()
+	elseif tool.Name=="DarkBattlerTool" then
+		tool:Activate()
+	 end
 	end
 end
+
 Button.MouseButton1Down:Connect(function()
 	isHolding = true
 	task.spawn(function()
@@ -135,6 +141,10 @@ task.spawn(function()
 				Button.Text = "Kick"
 			elseif tool.Name == "StunnerTool" then
 				Button.Text = "Fire"
+			elseif tool.Name=="DarkBattlerTool" then
+				Button.Text = "SuperPunch"
+			elseif tool.Name=="SpeedsterTool" then
+				Button.Text = "BONK"
 			else
 				Button.Text = "Ability"
 			end
