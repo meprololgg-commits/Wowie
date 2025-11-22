@@ -8,10 +8,10 @@ local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "UI"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = CoreGui
+
 local plrteam = player.Team
-if not plrteam then
-	print("NO!")
-end
+local CurrentTool=nil
+
 local Button = Instance.new("TextButton")
 Button.Name = "Button"
 Button.Parent = screenGui
@@ -20,6 +20,7 @@ Button.Size = UDim2.new(0.094, 0, 0.147, 0)
 Button.Position = UDim2.new(0.877, 0, 0.549, 0) 
 Button.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
 Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+Button.TextWrapped=true
 Button.Font = Enum.Font.SourceSansBold
 Button.TextSize = 24
 Button.BorderSizePixel = 0
@@ -89,28 +90,32 @@ local function fireAbility()
 	if not tool then return end
 	local RemoteEvent = tool:FindFirstChildOfClass("RemoteEvent")
 	if RemoteEvent then 
-	if tool.Name == "BarbaricTool" then
-		RemoteEvent:FireServer("Charge")
-	elseif tool.Name == "SpartanTool" then
-		RemoteEvent:FireServer("Kick")
-	elseif tool.Name == "StunnerTool" then
-		local enemy, hitPart = findClosestEnemyWithRaycast()
-		if hitPart then
+		if tool.Name == "BarbaricTool" then
+			RemoteEvent:FireServer("Charge")
+		elseif tool.Name == "SpartanTool" then
+			RemoteEvent:FireServer("Kick")
+		elseif tool.Name == "StunnerTool" then
+			local enemy, hitPart = findClosestEnemyWithRaycast()
 			if hitPart then
-				RemoteEvent:FireServer("Shoot", hitPart)
+				if hitPart then
+					RemoteEvent:FireServer("Shoot", hitPart)
+				end
+			else
+				print("No enemy in range!")
 			end
-		else
-			print("No enemy in range!")
-		end
-	elseif tool.Name=="CakeTool" or tool.Name=="PukeTool" then
-		RemoteEvent:FireServer("Ability")
+		elseif tool.Name=="CakeTool" or tool.Name=="PukeTool" then
+			RemoteEvent:FireServer("Ability")
 		end
 	else
-	if tool.Name=="SpeedsterTool" then
-		tool:Activate()
-	elseif tool.Name=="DarkBattlerTool" then
-		tool:Activate()
-	 end
+		if tool.Name=="SpeedsterTool" then
+			tool:Activate()
+			
+			return tool
+		elseif tool.Name=="DarkBattlerTool" then
+			tool:Activate()
+			
+			return tool
+		end
 	end
 end
 
@@ -118,13 +123,22 @@ Button.MouseButton1Down:Connect(function()
 	isHolding = true
 	task.spawn(function()
 		while isHolding do
-			fireAbility()
+			local tool=fireAbility()
+			if tool and CurrentTool ~= tool then
+				CurrentTool=tool
+				print("YES!")
+			end
 			task.wait(0.1) 
 		end
 	end)
 end)
+
 Button.MouseButton1Up:Connect(function()
 	isHolding = false
+	if CurrentTool then
+		CurrentTool:Deactivate()
+		CurrentTool=nil
+	end
 end)
 task.spawn(function()
 	while true do
