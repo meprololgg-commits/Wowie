@@ -117,12 +117,13 @@ local function fireAbility()
 		elseif tool.Name == "PukeTool" then
 			RemoteEvent:FireServer("Ability")
 		end
-		
+
 		if tool.Name == "CakeTool" and not CakeActive then
 			RemoteEvent:FireServer("Ability")
 		else
 			if tool.Name == "CakeTool" and CakeActive then
 				tool:Activate()
+				return tool
 			end
 		end
 	else
@@ -178,7 +179,7 @@ local function listentocake()
 				LaughCon = laughSound.Played:Connect(function()
 					CakeActive = true
 				end)
-		 else
+			else
 				disclaugh()
 			end
 		else
@@ -265,4 +266,5 @@ task.spawn(function()
 		end
 	end
 end)
+
 
