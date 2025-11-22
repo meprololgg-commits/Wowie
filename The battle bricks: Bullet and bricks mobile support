@@ -3,6 +3,7 @@ local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
 local player = Players.LocalPlayer 
 local char = player.Character or player.CharacterAdded:Wait()
+local hum = char:WaitForChild("Humanoid")
 if not player then return end
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "UI"
@@ -10,7 +11,13 @@ screenGui.ResetOnSpawn = false
 screenGui.Parent = CoreGui
 
 local plrteam = player.Team
-local CurrentTool=nil
+local CurrentTool = nil
+
+local HasCake = false
+local CakeActive = false
+
+local Cakecon
+local LaughCon
 
 local Button = Instance.new("TextButton")
 Button.Name = "Button"
@@ -20,7 +27,7 @@ Button.Size = UDim2.new(0.094, 0, 0.147, 0)
 Button.Position = UDim2.new(0.877, 0, 0.549, 0) 
 Button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 Button.TextColor3 = Color3.fromRGB(255, 255, 255)
-Button.TextWrapped=true
+Button.TextWrapped = true
 Button.Font = Enum.Font.SourceSansBold
 Button.TextSize = 24
 Button.BorderSizePixel = 0
@@ -28,11 +35,15 @@ Button.AutoButtonColor = true
 Button.BackgroundTransparency = 0.5
 local ConerUi = Instance.new("UICorner")
 ConerUi.Parent = Button
+
 local isHolding = false
 local TARGETING_RANGE = 250
+
 player.CharacterAdded:Connect(function(newChar)
 	char = newChar
+	hum = char:WaitForChild("Humanoid")
 end)
+
 local function isEnemyTeam(targetPlayer)
 	if not plrteam or not targetPlayer.Team then
 		return targetPlayer ~= player
@@ -50,7 +61,7 @@ local function findClosestEnemyWithRaycast()
 	local raycastParams = RaycastParams.new()
 	raycastParams.FilterType = Enum.RaycastFilterType.Exclude
 	local filterList = {char}
-	for _, targetPlayer in pairs(Players:GetPlayers()) do
+	for _, targetPlayer in Players:GetPlayers() do
 		if targetPlayer ~= player and not isEnemyTeam(targetPlayer) then
 			if targetPlayer.Character then
 				table.insert(filterList, targetPlayer.Character)
@@ -58,7 +69,7 @@ local function findClosestEnemyWithRaycast()
 		end
 	end
 	raycastParams.FilterDescendantsInstances = filterList
-	for _, targetPlayer in pairs(Players:GetPlayers()) do
+	for _, targetPlayer in Players:GetPlayers() do
 		if targetPlayer == player then continue end
 		if not isEnemyTeam(targetPlayer) then continue end
 		local targetChar = targetPlayer.Character
@@ -103,14 +114,22 @@ local function fireAbility()
 			else
 				print("No enemy in range!")
 			end
-		elseif tool.Name=="CakeTool" or tool.Name=="PukeTool" then
+		elseif tool.Name == "PukeTool" then
 			RemoteEvent:FireServer("Ability")
 		end
+		
+		if tool.Name == "CakeTool" and not CakeActive then
+			RemoteEvent:FireServer("Ability")
+		else
+			if tool.Name == "CakeTool" and CakeActive then
+				tool:Activate()
+			end
+		end
 	else
-		if tool.Name=="SpeedsterTool" then
+		if tool.Name == "SpeedsterTool" then
 			tool:Activate()
 			return tool
-		elseif tool.Name=="DarkBattlerTool" then
+		elseif tool.Name == "DarkBattlerTool" then
 			tool:Activate()
 			return tool
 		end
@@ -120,11 +139,11 @@ end
 Button.InputBegan:Connect(function()
 	isHolding = true
 	task.spawn(function()
-		while isHolding do
+		while isHolding and hum and hum.Health > 0 do
 			print("OK!")
-			local tool=fireAbility()
+			local tool = fireAbility()
 			if tool and CurrentTool ~= tool then
-				CurrentTool=tool
+				CurrentTool = tool
 				print("YES!")
 			end
 			task.wait(0.01) 
@@ -136,9 +155,73 @@ Button.InputEnded:Connect(function()
 	isHolding = false
 	if CurrentTool then
 		CurrentTool:Deactivate()
-		CurrentTool=nil
+		CurrentTool = nil
 	end
 end)
+
+local function disclaugh()
+	if LaughCon then
+		LaughCon:Disconnect()
+		LaughCon = nil
+	end
+end
+
+
+local function listentocake()
+	local tool = char:FindFirstChild("CakeTool")
+	if tool then
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		if hrp then
+			local laughSound = hrp:FindFirstChild("Laugh")
+			if laughSound and laughSound:IsA("Sound") then
+				disclaugh()
+				LaughCon = laughSound.Played:Connect(function()
+					CakeActive = true
+				end)
+		 else
+				disclaugh()
+			end
+		else
+			disclaugh()
+		end
+	else
+		disclaugh()
+	end
+end
+
+
+char.ChildAdded:Connect(function(child)
+	if child:IsA("Tool") and child.Name == "CakeTool" then
+		HasCake = true
+		CakeActive = false
+		listentocake()
+	end
+end)
+
+char.ChildRemoved:Connect(function(child)
+	if child:IsA("Tool") and child.Name == "CakeTool" then
+		HasCake = false
+		CakeActive = false
+		disclaugh()
+	end
+end)
+
+
+player.CharacterAdded:Connect(function(newChar)
+	char = newChar
+	hum = char:WaitForChild("Humanoid")
+	HasCake = false
+	CakeActive = false
+	disclaugh()
+	task.wait(0.1)
+	listentocake()
+end)
+
+if char:FindFirstChild("CakeTool") then
+	HasCake = true
+	CakeActive = false
+	listentocake()
+end
 
 task.spawn(function()
 	while true do
@@ -155,10 +238,25 @@ task.spawn(function()
 				Button.Text = "Kick"
 			elseif tool.Name == "StunnerTool" then
 				Button.Text = "Fire"
-			elseif tool.Name=="DarkBattlerTool" then
+			elseif tool.Name == "DarkBattlerTool" then
 				Button.Text = "SuperPunch"
-			elseif tool.Name=="SpeedsterTool" then
+			elseif tool.Name == "SpeedsterTool" then
 				Button.Text = "BONK"
+			elseif tool.Name == "CakeTool" then
+				if not HasCake then
+					HasCake = true
+					CakeActive = false
+					Cakecon = hum.Died:Connect(function()
+						CakeActive = false
+						HasCake = false
+						disclaugh()
+						if Cakecon then
+							Cakecon:Disconnect()
+							Cakecon = nil
+						end
+					end)
+				end
+				Button.Text = not CakeActive and "Cake" or "Punch"
 			else
 				Button.Text = "Ability"
 			end
@@ -167,3 +265,4 @@ task.spawn(function()
 		end
 	end
 end)
+
