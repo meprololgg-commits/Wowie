@@ -116,8 +116,9 @@ local function fireAbility()
 			end
 		elseif tool.Name == "PukeTool" then
 			RemoteEvent:FireServer("Ability")
+		elseif tool.Name=="TrowelBattlerTool" or tool.Name=="BuilderBattlerTool"  then
+			RemoteEvent:FireServer("BuildWall")
 		end
-
 		if tool.Name == "CakeTool" and not CakeActive then
 			RemoteEvent:FireServer("Ability")
 		else
@@ -243,6 +244,8 @@ task.spawn(function()
 				Button.Text = "SuperPunch"
 			elseif tool.Name == "SpeedsterTool" then
 				Button.Text = "BONK"
+			elseif tool.Name=="TrowelBattlerTool" or tool.Name=="BuilderBattlerTool"  then
+				Button.Text = "Wall"
 			elseif tool.Name == "CakeTool" then
 				if not HasCake then
 					HasCake = true
@@ -266,5 +269,4 @@ task.spawn(function()
 		end
 	end
 end)
-
 
