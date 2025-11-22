@@ -18,7 +18,7 @@ Button.Parent = screenGui
 Button.Text = "Ability"
 Button.Size = UDim2.new(0.094, 0, 0.147, 0)
 Button.Position = UDim2.new(0.877, 0, 0.549, 0) 
-Button.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+Button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 Button.TextColor3 = Color3.fromRGB(255, 255, 255)
 Button.TextWrapped=true
 Button.Font = Enum.Font.SourceSansBold
@@ -109,37 +109,37 @@ local function fireAbility()
 	else
 		if tool.Name=="SpeedsterTool" then
 			tool:Activate()
-			
 			return tool
 		elseif tool.Name=="DarkBattlerTool" then
 			tool:Activate()
-			
 			return tool
 		end
 	end
 end
 
-Button.MouseButton1Down:Connect(function()
+Button.InputBegan:Connect(function()
 	isHolding = true
 	task.spawn(function()
 		while isHolding do
+			print("OK!")
 			local tool=fireAbility()
 			if tool and CurrentTool ~= tool then
 				CurrentTool=tool
 				print("YES!")
 			end
-			task.wait(0.1) 
+			task.wait(0.01) 
 		end
 	end)
 end)
 
-Button.MouseButton1Up:Connect(function()
+Button.InputEnded:Connect(function()
 	isHolding = false
 	if CurrentTool then
 		CurrentTool:Deactivate()
 		CurrentTool=nil
 	end
 end)
+
 task.spawn(function()
 	while true do
 		wait(0.08)
