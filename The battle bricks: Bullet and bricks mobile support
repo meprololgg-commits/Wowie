@@ -113,7 +113,7 @@ local function fireAbility()
 		elseif tool.Name == "BallerBattlerTool" then
 			local enemy, targetHRP = findClosestEnemy()
 			if targetHRP then
-				RemoteEvent:FireServer("Shoot", targetHRP.CFrame + Vector.new(0,5,0))
+				RemoteEvent:FireServer("Shoot", targetHRP.CFrame + Vector3.new(0,5,0))
 			else
 				print("No enemy in range!")
 			end
