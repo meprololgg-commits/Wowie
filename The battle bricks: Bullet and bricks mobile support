@@ -13,7 +13,6 @@ screenGui.Name = "UI"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = CoreGui
 
-local plrteam = player.Team
 local CurrentTool = nil
 local HasCake = false
 local CakeActive = false
@@ -46,11 +45,12 @@ player.CharacterAdded:Connect(function(newChar)
 	hum = char:WaitForChild("Humanoid")
 end)
 
+
 local function isEnemyTeam(targetPlayer)
-	if not plrteam or not targetPlayer.Team then
+	if not player.Team or not targetPlayer.Team then
 		return targetPlayer ~= player
 	end
-	return targetPlayer.Team ~= plrteam
+	return targetPlayer.Team ~= player.Team
 end
 
 local function findClosestEnemy()
@@ -111,12 +111,12 @@ local function fireAbility()
 				print("No enemy in range!")
 			end
 		elseif tool.Name == "BallerBattlerTool" then
-         local enemy, targetHRP = findClosestEnemy()
-        if targetHRP then
-          RemoteEvent:FireServer("Shoot", targetHRP.CFrame * CFrame.new(0, 5, 0))
-       else
-        print("No enemy in range!")
-       end
+			local enemy, targetHRP = findClosestEnemy()
+			if targetHRP then
+				RemoteEvent:FireServer("Shoot", targetHRP.CFrame * CFrame.new(0, 5, 0))
+			else
+				print("No enemy in range!")
+			end
 		elseif tool.Name=="GrenadeTool" then
 			local enemy, targetHRP = findClosestEnemy()
 			if targetHRP then
@@ -247,6 +247,9 @@ task.spawn(function()
 			elseif tool.Name == "SpartanTool" then
 				Button.Text = "Kick"
 			elseif (tool.Name == "StunnerTool" or tool.Name=="PaintballBattlerTool" or (tool.Name=="RocketBattlerTool" or tool.Name=="BallerBattlerTool") or tool.Name=="CrocketBattlerTool")  then
+				if tool.Enabled then
+					tool.Enabled=false
+				end
 				Button.Text = "Fire"
 			elseif tool.Name == "DarkBattlerTool" then
 				Button.Text = "SuperPunch"
@@ -255,6 +258,9 @@ task.spawn(function()
 			elseif tool.Name=="TrowelBattlerTool" or tool.Name=="BuilderBattlerTool" then
 				Button.Text = "Wall"
 			elseif tool.Name=="GrenadeTool" then
+				if tool.Enabled then
+					tool.Enabled=false
+				end
 				Button.Text = "Throw"
 			elseif tool.Name == "CakeTool" then
 				if not HasCake then
@@ -279,3 +285,4 @@ task.spawn(function()
 		end
 	end
 end)
+
