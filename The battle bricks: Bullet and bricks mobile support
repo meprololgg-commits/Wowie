@@ -1,10 +1,13 @@
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
-local player = Players.LocalPlayer 
+
+local player = Players.LocalPlayer
 local char = player.Character or player.CharacterAdded:Wait()
 local hum = char:WaitForChild("Humanoid")
+
 if not player then return end
+
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "UI"
 screenGui.ResetOnSpawn = false
@@ -12,10 +15,8 @@ screenGui.Parent = CoreGui
 
 local plrteam = player.Team
 local CurrentTool = nil
-
 local HasCake = false
 local CakeActive = false
-
 local Cakecon
 local LaughCon
 
@@ -24,7 +25,7 @@ Button.Name = "Button"
 Button.Parent = screenGui
 Button.Text = "Ability"
 Button.Size = UDim2.new(0.094, 0, 0.147, 0)
-Button.Position = UDim2.new(0.877, 0, 0.549, 0) 
+Button.Position = UDim2.new(0.877, 0, 0.549, 0)
 Button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 Button.TextColor3 = Color3.fromRGB(255, 255, 255)
 Button.TextWrapped = true
@@ -33,6 +34,7 @@ Button.TextSize = 24
 Button.BorderSizePixel = 0
 Button.AutoButtonColor = true
 Button.BackgroundTransparency = 0.5
+
 local ConerUi = Instance.new("UICorner")
 ConerUi.Parent = Button
 
@@ -51,74 +53,65 @@ local function isEnemyTeam(targetPlayer)
 	return targetPlayer.Team ~= plrteam
 end
 
-local function findClosestEnemyWithRaycast()
+local function findClosestEnemy()
 	local closestEnemy = nil
 	local closestDistance = TARGETING_RANGE
-	local hitPart = nil
+	local closestHRP = nil
+
 	local playerHRP = char:FindFirstChild("HumanoidRootPart")
 	if not playerHRP then return nil, nil end
+
 	local playerPos = playerHRP.Position
-	local raycastParams = RaycastParams.new()
-	raycastParams.FilterType = Enum.RaycastFilterType.Exclude
-	local filterList = {char}
-	for _, targetPlayer in Players:GetPlayers() do
-		if targetPlayer ~= player and not isEnemyTeam(targetPlayer) then
-			if targetPlayer.Character then
-				table.insert(filterList, targetPlayer.Character)
-			end
-		end
-	end
-	raycastParams.FilterDescendantsInstances = filterList
+
 	for _, targetPlayer in Players:GetPlayers() do
 		if targetPlayer == player then continue end
 		if not isEnemyTeam(targetPlayer) then continue end
+
 		local targetChar = targetPlayer.Character
 		if not targetChar then continue end
+
 		local targetHRP = targetChar:FindFirstChild("HumanoidRootPart")
 		if not targetHRP then continue end
+
 		local targetHumanoid = targetChar:FindFirstChild("Humanoid")
 		if not targetHumanoid or targetHumanoid.Health <= 0 then continue end
+
 		local distance = (targetHRP.Position - playerPos).Magnitude
 		if distance < closestDistance then
-			local direction = (targetHRP.Position - playerPos).Unit
-			local ray = workspace:Raycast(playerPos, direction * TARGETING_RANGE, raycastParams)
-			if ray and ray.Instance then
-				local hitCharacter = ray.Instance.Parent
-				if hitCharacter == targetChar then
-					closestDistance = distance
-					closestEnemy = targetPlayer
-					hitPart = ray.Instance
-				end
-			end
+			closestDistance = distance
+			closestEnemy = targetPlayer
+			closestHRP = targetHRP
 		end
 	end
-	return closestEnemy, hitPart
+
+	return closestEnemy, closestHRP
 end
 
 local function fireAbility()
 	if not char then return end
+
 	local tool = char:FindFirstChildOfClass("Tool")
 	if not tool then return end
+
 	local RemoteEvent = tool:FindFirstChildOfClass("RemoteEvent")
-	if RemoteEvent then 
+	if RemoteEvent then
 		if tool.Name == "BarbaricTool" then
 			RemoteEvent:FireServer("Charge")
 		elseif tool.Name == "SpartanTool" then
 			RemoteEvent:FireServer("Kick")
 		elseif tool.Name == "StunnerTool" then
-			local enemy, hitPart = findClosestEnemyWithRaycast()
-			if hitPart then
-				if hitPart then
-					RemoteEvent:FireServer("Shoot", hitPart)
-				end
+			local enemy, targetHRP:BasePart = findClosestEnemy()
+			if targetHRP then
+				RemoteEvent:FireServer("Shoot", targetHRP.CFrame)
 			else
 				print("No enemy in range!")
 			end
 		elseif tool.Name == "PukeTool" then
 			RemoteEvent:FireServer("Ability")
-		elseif tool.Name=="TrowelBattlerTool" or tool.Name=="BuilderBattlerTool"  then
+		elseif tool.Name=="TrowelBattlerTool" or tool.Name=="BuilderBattlerTool" then
 			RemoteEvent:FireServer("BuildWall")
 		end
+
 		if tool.Name == "CakeTool" and not CakeActive then
 			RemoteEvent:FireServer("Ability")
 		else
@@ -148,7 +141,7 @@ Button.InputBegan:Connect(function()
 				CurrentTool = tool
 				print("YES!")
 			end
-			task.wait(0.01) 
+			task.wait(0.01)
 		end
 	end)
 end)
@@ -167,7 +160,6 @@ local function disclaugh()
 		LaughCon = nil
 	end
 end
-
 
 local function listentocake()
 	local tool = char:FindFirstChild("CakeTool")
@@ -191,7 +183,6 @@ local function listentocake()
 	end
 end
 
-
 char.ChildAdded:Connect(function(child)
 	if child:IsA("Tool") and child.Name == "CakeTool" then
 		HasCake = true
@@ -207,7 +198,6 @@ char.ChildRemoved:Connect(function(child)
 		disclaugh()
 	end
 end)
-
 
 player.CharacterAdded:Connect(function(newChar)
 	char = newChar
@@ -232,6 +222,7 @@ task.spawn(function()
 			Button.Text = "None"
 			continue
 		end
+
 		local tool = char:FindFirstChildOfClass("Tool")
 		if tool then
 			if tool.Name == "BarbaricTool" then
@@ -244,7 +235,7 @@ task.spawn(function()
 				Button.Text = "SuperPunch"
 			elseif tool.Name == "SpeedsterTool" then
 				Button.Text = "BONK"
-			elseif tool.Name=="TrowelBattlerTool" or tool.Name=="BuilderBattlerTool"  then
+			elseif tool.Name=="TrowelBattlerTool" or tool.Name=="BuilderBattlerTool" then
 				Button.Text = "Wall"
 			elseif tool.Name == "CakeTool" then
 				if not HasCake then
@@ -269,4 +260,3 @@ task.spawn(function()
 		end
 	end
 end)
-
