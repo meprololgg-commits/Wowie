@@ -63,12 +63,15 @@ local function findClosestEnemy()
 
 	local playerPos = playerHRP.Position
 
-	for _, targetPlayer in Players:GetPlayers() do
-		if targetPlayer == player then continue end
-		if not isEnemyTeam(targetPlayer) then continue end
+	local CharactersFolder = workspace:FindFirstChild("Characters")
+	if not CharactersFolder then return nil, nil end
 
-		local targetChar = targetPlayer.Character
-		if not targetChar then continue end
+	for _, targetChar in CharactersFolder:GetChildren() do
+		if targetChar == char then continue end
+
+		local targetPlayer = Players:GetPlayerFromCharacter(targetChar)
+		if not targetPlayer then continue end
+		if not isEnemyTeam(targetPlayer) then continue end
 
 		local targetHRP = targetChar:FindFirstChild("HumanoidRootPart")
 		if not targetHRP then continue end
@@ -87,6 +90,7 @@ local function findClosestEnemy()
 	return closestEnemy, closestHRP
 end
 
+
 local function fireAbility()
 	if not char then return end
 
@@ -99,10 +103,24 @@ local function fireAbility()
 			RemoteEvent:FireServer("Charge")
 		elseif tool.Name == "SpartanTool" then
 			RemoteEvent:FireServer("Kick")
-		elseif tool.Name == "StunnerTool" then
-			local enemy, targetHRP:BasePart = findClosestEnemy()
+		elseif (tool.Name == "StunnerTool" or tool.Name=="PaintballBattlerTool" or (tool.Name=="RocketBattlerTool" or tool.Name=="CrocketBattlerTool")) then
+			local enemy, targetHRP = findClosestEnemy()
 			if targetHRP then
 				RemoteEvent:FireServer("Shoot", targetHRP.CFrame)
+			else
+				print("No enemy in range!")
+			end
+		elseif tool.Name == "BallerBattlerTool" then
+			local enemy, targetHRP = findClosestEnemy()
+			if targetHRP then
+				RemoteEvent:FireServer("Shoot", targetHRP.CFrame + CFrame.new(0,5,0))
+			else
+				print("No enemy in range!")
+			end
+		elseif tool.Name=="GrenadeTool" then
+			local enemy, targetHRP = findClosestEnemy()
+			if targetHRP then
+				RemoteEvent:FireServer("Throw", targetHRP.CFrame)
 			else
 				print("No enemy in range!")
 			end
@@ -111,7 +129,6 @@ local function fireAbility()
 		elseif tool.Name=="TrowelBattlerTool" or tool.Name=="BuilderBattlerTool" then
 			RemoteEvent:FireServer("BuildWall")
 		end
-
 		if tool.Name == "CakeTool" and not CakeActive then
 			RemoteEvent:FireServer("Ability")
 		else
@@ -229,7 +246,7 @@ task.spawn(function()
 				Button.Text = "Charge"
 			elseif tool.Name == "SpartanTool" then
 				Button.Text = "Kick"
-			elseif tool.Name == "StunnerTool" then
+			elseif (tool.Name == "StunnerTool" or tool.Name=="PaintballBattlerTool" or (tool.Name=="RocketBattlerTool" or tool.Name=="BallerBattlerTool") or tool.Name=="CrocketBattlerTool")  then
 				Button.Text = "Fire"
 			elseif tool.Name == "DarkBattlerTool" then
 				Button.Text = "SuperPunch"
@@ -237,6 +254,8 @@ task.spawn(function()
 				Button.Text = "BONK"
 			elseif tool.Name=="TrowelBattlerTool" or tool.Name=="BuilderBattlerTool" then
 				Button.Text = "Wall"
+			elseif tool.Name=="GrenadeTool" then
+				Button.Text = "Throw"
 			elseif tool.Name == "CakeTool" then
 				if not HasCake then
 					HasCake = true
