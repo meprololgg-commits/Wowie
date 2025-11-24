@@ -1,11 +1,9 @@
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
-local UserInputService = game:GetService("UserInputService")
 
 local player = Players.LocalPlayer
 local char = player.Character or player.CharacterAdded:Wait()
 local hum = char:WaitForChild("Humanoid")
-local Camera=workspace.CurrentCamera
 
 if not player then return end
 
@@ -45,7 +43,6 @@ player.CharacterAdded:Connect(function(newChar)
 	char = newChar
 	hum = char:WaitForChild("Humanoid")
 end)
-
 
 local function isEnemyTeam(targetPlayer)
 	if not player.Team or not targetPlayer.Team then
@@ -94,7 +91,6 @@ local function findClosestEnemy()
 	return closestEnemy, closestHRP
 end
 
-
 local function fireAbility()
 	if not char then return end
 
@@ -107,23 +103,22 @@ local function fireAbility()
 			RemoteEvent:FireServer("Charge")
 		elseif tool.Name == "SpartanTool" then
 			RemoteEvent:FireServer("Kick")
-		elseif (tool.Name == "StunnerTool" or tool.Name=="PaintballBattlerTool" or (tool.Name=="RocketBattlerTool" or tool.Name=="CrocketBattlerTool")) then
-			local enemy, targetHRP = findClosestEnemy()
+		elseif (tool.Name == "StunnerTool" or tool.Name=="PaintballBattlerTool" or tool.Name=="RocketBattlerTool" or tool.Name=="CrocketBattlerTool") then
+			local _, targetHRP = findClosestEnemy()
 			if targetHRP then
-                Camera.CFrame=targetHRP.CFrame
 				RemoteEvent:FireServer("Shoot", targetHRP.CFrame)
 			else
 				print("No enemy in range!")
 			end
 		elseif tool.Name == "BallerBattlerTool" then
-			local enemy, targetHRP = findClosestEnemy()
+			local _, targetHRP = findClosestEnemy()
 			if targetHRP then
 				RemoteEvent:FireServer("Shoot", targetHRP.CFrame * CFrame.new(0, 5, 0))
 			else
 				print("No enemy in range!")
 			end
 		elseif tool.Name=="GrenadeTool" then
-			local enemy, targetHRP = findClosestEnemy()
+			local _, targetHRP = findClosestEnemy()
 			if targetHRP then
 				RemoteEvent:FireServer("Throw", targetHRP.CFrame)
 			else
@@ -157,11 +152,9 @@ Button.InputBegan:Connect(function()
 	isHolding = true
 	task.spawn(function()
 		while isHolding and hum and hum.Health > 0 do
-			print("OK!")
 			local tool = fireAbility()
 			if tool and CurrentTool ~= tool then
 				CurrentTool = tool
-				print("YES!")
 			end
 			task.wait(0.01)
 		end
@@ -197,11 +190,7 @@ local function listentocake()
 			else
 				disclaugh()
 			end
-		else
-			disclaugh()
 		end
-	else
-		disclaugh()
 	end
 end
 
@@ -251,10 +240,8 @@ task.spawn(function()
 				Button.Text = "Charge"
 			elseif tool.Name == "SpartanTool" then
 				Button.Text = "Kick"
-			elseif (tool.Name == "StunnerTool" or tool.Name=="PaintballBattlerTool" or (tool.Name=="RocketBattlerTool" or tool.Name=="BallerBattlerTool") or tool.Name=="CrocketBattlerTool")  then
-				if tool.Enabled then
-					tool.Enabled=false
-				end
+			elseif (tool.Name == "StunnerTool" or tool.Name=="PaintballBattlerTool" or tool.Name=="RocketBattlerTool" or tool.Name=="BallerBattlerTool" or tool.Name=="CrocketBattlerTool") then
+				if tool.Enabled then tool.Enabled = false end
 				Button.Text = "Fire"
 			elseif tool.Name == "DarkBattlerTool" then
 				Button.Text = "SuperPunch"
@@ -263,23 +250,12 @@ task.spawn(function()
 			elseif tool.Name=="TrowelBattlerTool" or tool.Name=="BuilderBattlerTool" then
 				Button.Text = "Wall"
 			elseif tool.Name=="GrenadeTool" then
-				if tool.Enabled then
-					tool.Enabled=false
-				end
+				if tool.Enabled then tool.Enabled = false end
 				Button.Text = "Throw"
 			elseif tool.Name == "CakeTool" then
 				if not HasCake then
 					HasCake = true
 					CakeActive = false
-					Cakecon = hum.Died:Connect(function()
-						CakeActive = false
-						HasCake = false
-						disclaugh()
-						if Cakecon then
-							Cakecon:Disconnect()
-							Cakecon = nil
-						end
-					end)
 				end
 				Button.Text = not CakeActive and "Cake" or "Punch"
 			else
