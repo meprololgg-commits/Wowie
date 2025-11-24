@@ -15,6 +15,8 @@ local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "AbilityUI"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = CoreGui
+local TweenService_upvr= game:GetService("TweenService")
+local HumanoidRootPart= char:WaitForChild("HumanoidRootPart")
 
 local Button = Instance.new("TextButton")
 Button.Name = "AbilityButton"
@@ -128,9 +130,19 @@ local function fireAbility()
 	elseif tool.Name == "CakeTool" and not CakeActive then
 		remote:FireServer("Ability")
 
-	elseif string.find(tool.Name, "Paintball") or string.find(tool.Name, "Rocket") or string.find(tool.Name, "Stunner") or string.find(tool.Name, "Crocket")  or tool.Name=="CupcakeLauncher" then
+	elseif string.find(tool.Name, "Paintball") or string.find(tool.Name, "Rocket") or string.find(tool.Name, "Stunner") or string.find(tool.Name, "Crocket") or tool.Name=="SlingerBattlerTool"  or tool.Name=="CupcakeLauncher" then
 		if aimCF then remote:FireServer("Shoot", aimCF) end
-
+	elseif tool.Name=="SniperTool" then
+		if aimCF then
+			remote:FireServer("Shoot", aimCF) 
+			task.spawn(function()
+			TweenService_upvr:Create(HumanoidRootPart, TweenInfo.new(0.15, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
+				CFrame = CFrame.lookAt(HumanoidRootPart.Position, Vector3.new(aimCF.Position.X,  aimCF.Position.Y,  aimCF.Position.Z));
+				}):Play()
+				task.wait(1)
+				remote:FireServer("StoppedFiring", aimCF)
+			end)
+		end
 	elseif tool.Name == "BallerBattlerTool" or tool.Name=="SoccerBattlerTool" then
 		if aimCF then remote:FireServer("Shoot", aimCF * CFrame.new(0, 5, 0)) end
 
@@ -212,7 +224,7 @@ task.spawn(function()
 			if tool.Name == "BarbaricTool" then Button.Text = "Charge"
 			elseif tool.Name == "SpartanTool" then Button.Text = "Kick"
 			elseif tool.Name == "PukeTool" then Button.Text = "Puke"
-			elseif string.find(tool.Name, "Paintball") or string.find(tool.Name, "Rocket") or tool.Name == "StunnerTool" or tool.Name=="CrocketBattlerTool"  or tool.Name=="CupcakeLauncher" then Button.Text = "Fire"
+			elseif string.find(tool.Name, "Paintball") or string.find(tool.Name, "Rocket") or tool.Name == "StunnerTool" or tool.Name=="SlingerBattlerTool" or tool.Name=="CrocketBattlerTool" or tool.Name=="SniperTool" or tool.Name=="CupcakeLauncher" then Button.Text = "Fire"
 			elseif tool.Name == "GrenadeTool" or tool.Name=="ArsonTool" then Button.Text = "Throw"
 			elseif tool.Name == "BallerBattlerTool" or tool.Name=="SoccerBattlerTool"  then Button.Text = "Throw"
 			elseif tool.Name == "CakeTool" then Button.Text = CakeActive and "Punch" or "Cake"
@@ -224,7 +236,6 @@ task.spawn(function()
 		end
 	end
 end)
-
 
 
 
