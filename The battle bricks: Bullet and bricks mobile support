@@ -1,4 +1,4 @@
-local Players = game:GetService("Players")
+ocal Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 
 local player = Players.LocalPlayer
@@ -65,20 +65,20 @@ local function findClosestEnemy()
 	if not CharactersFolder then return nil, nil end
 
 	for _, targetChar in CharactersFolder:GetChildren() do
-		if targetChar == char then continue end
+		if targetChar == char then return end
 
 		local targetPlayer = Players:GetPlayerFromCharacter(targetChar)
-		if not targetPlayer then continue end
-		if not isEnemyTeam(targetPlayer) then continue end
+		if not targetPlayer then return end
+		if not isEnemyTeam(targetPlayer) then return end
 
 		local targetHRP = targetChar:FindFirstChild("HumanoidRootPart")
-		if not targetHRP then continue end
+		if not targetHRP then return end
 
 		local targetHumanoid = targetChar:FindFirstChild("Humanoid")
-		if not targetHumanoid or targetHumanoid.Health <= 0 then continue end
+		if not targetHumanoid or targetHumanoid.Health <= 0 then return end
 
 		local targetTool = targetChar:FindFirstChildOfClass("Tool")
-		if not targetTool then continue end
+		if not targetTool then return end
 
 		local distance = (targetHRP.Position - playerPos).Magnitude
 		if distance < closestDistance then
