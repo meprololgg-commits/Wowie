@@ -1,3 +1,5 @@
+repeat task.wait() until game:IsLoaded() and game.Players.LocalPlayer
+task.spawn(function()
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
@@ -5,7 +7,6 @@ local UserInputService = game:GetService("UserInputService")
 local player = Players.LocalPlayer
 local char = player.Character or player.CharacterAdded:Wait()
 local hum = char:WaitForChild("Humanoid")
-local Camera=workspace.CurrentCamera
 
 if not player then return end
 
@@ -107,7 +108,6 @@ local function fireAbility()
 		elseif (tool.Name == "StunnerTool" or tool.Name=="PaintballBattlerTool" or (tool.Name=="RocketBattlerTool" or tool.Name=="CrocketBattlerTool")) then
 			local enemy, targetHRP = findClosestEnemy()
 			if targetHRP then
-                Camera.CFrame=targetHRP.CFrame
 				RemoteEvent:FireServer("Shoot", targetHRP.CFrame)
 			else
 				print("No enemy in range!")
@@ -287,4 +287,4 @@ task.spawn(function()
 		end
 	end
 end)
-
+end)
