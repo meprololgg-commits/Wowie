@@ -46,28 +46,20 @@ local function isEnemyTeam(p)
 	return player.Team ~= p.Team
 end
 
+local function getBestAimCFrame(targetHRP, tool)
+    if not targetHRP then return nil end
+    local myHRP = char:FindFirstChild("HumanoidRootPart")
+    if not myHRP then return nil end
 
-local function getBestAimCFrame(targetHRP,tool)
-	if not targetHRP then return nil end
-	local myHRP = char:FindFirstChild("HumanoidRootPart")
-	if not myHRP then return nil end
+    local origin = myHRP.Position
+    local targetPos = targetHRP.Position
 
-	local origin = myHRP.Position
-	local targetPos = targetHRP.Position
+    local ping = player:GetNetworkPing()
+    local velocity = targetHRP.AssemblyLinearVelocity
+    local predicted = targetPos + (velocity * ping)
 
-	local velocity = targetHRP.Velocity
-	local predicted = targetPos + (velocity * 0.13)
-
-
-	predicted = predicted + Vector3.new(
-		math.random(-12, 12)/100,
-		math.random(5, 25)/100,
-		math.random(-12, 12)/100
-	)
-
-	return CFrame.lookAt(origin, predicted)
+    return CFrame.lookAt(origin, predicted)
 end
-
 
 local function findClosestEnemy()
 	local closestHRP = nil
