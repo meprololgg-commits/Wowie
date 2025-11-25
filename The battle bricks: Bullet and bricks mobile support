@@ -15,7 +15,7 @@ local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "AbilityUI"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = CoreGui
-local TweenService_upvr= game:GetService("TweenService")
+local TweenService= game:GetService("TweenService")
 local HumanoidRootPart= char:WaitForChild("HumanoidRootPart")
 
 local Button = Instance.new("TextButton")
@@ -46,26 +46,34 @@ local function isEnemyTeam(p)
 	return player.Team ~= p.Team
 end
 
-local function getBestAimCFrame(targetHRP, tool)
-    if not targetHRP then return nil end
-    local myHRP = char:FindFirstChild("HumanoidRootPart")
-    if not myHRP then return nil end
 
-    local origin = myHRP.Position
-    local targetPos = targetHRP.Position
+local function getBestAimCFrame(targetHRP,tool)
+	if not targetHRP then return nil end
+	local HumanoidRootPart = char:FindFirstChild("HumanoidRootPart")
+	if not HumanoidRootPart then return nil end
 
-    local ping = player:GetNetworkPing()
-    local velocity = targetHRP.AssemblyLinearVelocity
-    local predicted = targetPos + (velocity * ping)
+	local origin = HumanoidRootPart.Position
+	local targetPos = targetHRP.Position
 
-    return CFrame.lookAt(origin, predicted)
+	local velocity = targetHRP.Velocity
+	local predicted = targetPos + (velocity * 0.13)
+
+
+	predicted = predicted + Vector3.new(
+		math.random(-12, 12)/100,
+		math.random(5, 25)/100,
+		math.random(-12, 12)/100
+	)
+
+	return CFrame.lookAt(origin, predicted)
 end
+
 
 local function findClosestEnemy()
 	local closestHRP = nil
 	local closestDist = TARGETING_RANGE
-	local myHRP = char:FindFirstChild("HumanoidRootPart")
-	if not myHRP then return nil end
+	local HumanoidRootPart = char:FindFirstChild("HumanoidRootPart")
+	if not HumanoidRootPart then return nil end
 
 	local folder = workspace:FindFirstChild("Characters") or workspace
 	for _, targetChar in folder:GetChildren() do
@@ -77,7 +85,7 @@ local function findClosestEnemy()
 
 			if targetPlayer and hrp and humanoid and humanoid.Health > 0
 				and tool and isEnemyTeam(targetPlayer) then
-				local dist = (hrp.Position - myHRP.Position).Magnitude
+				local dist = (hrp.Position - HumanoidRootPart.Position).Magnitude
 				if dist < closestDist then
 					closestDist = dist
 					closestHRP = hrp
@@ -122,18 +130,39 @@ local function fireAbility()
 	elseif tool.Name == "CakeTool" and not CakeActive then
 		remote:FireServer("Ability")
 
-	elseif string.find(tool.Name, "Paintball") or string.find(tool.Name, "Rocket") or string.find(tool.Name, "Stunner") or string.find(tool.Name, "Crocket") or tool.Name=="SlingerBattlerTool"  or tool.Name=="CupcakeLauncher" then
-		if aimCF then remote:FireServer("Shoot", aimCF) end
+	elseif string.find(tool.Name, "Paintball") or string.find(tool.Name, "Rocket") or string.find(tool.Name, "Stunner") or string.find(tool.Name, "Crocket") or tool.Name=="SlingerBattlerTool" or tool.Name=="BakerTool" or tool.Name=="FudgeTool" or tool.Name=="CupcakeLauncher" then
+		if aimCF then 
+			task.spawn(function()
+				if not (HumanoidRootPart and aimCF) then return end
+				local myPos = HumanoidRootPart.Position
+				local targetPos = aimCF.Position
+
+				local flatLook = Vector3.new(targetPos.X, myPos.Y, targetPos.Z)  
+
+				local targetLookCFrame = CFrame.new(myPos, flatLook)
+
+				TweenService:Create(HumanoidRootPart, TweenInfo.new(0.15, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
+					CFrame = targetLookCFrame
+				}):Play()
+			end)
+			remote:FireServer("Shoot", aimCF) 
+		end
 	elseif tool.Name=="SniperTool" then
 		if aimCF then
-			remote:FireServer("Shoot", aimCF) 
 			task.spawn(function()
-			TweenService_upvr:Create(HumanoidRootPart, TweenInfo.new(0.15, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
-				CFrame = CFrame.lookAt(HumanoidRootPart.Position, Vector3.new(aimCF.Position.X,  aimCF.Position.Y,  aimCF.Position.Z));
+				if not (HumanoidRootPart and aimCF) then return end
+				local myPos = HumanoidRootPart.Position
+				local targetPos = aimCF.Position
+
+				local flatLook = Vector3.new(targetPos.X, myPos.Y, targetPos.Z)  
+
+				local targetLookCFrame = CFrame.new(myPos, flatLook)
+
+				TweenService:Create(HumanoidRootPart, TweenInfo.new(0.15, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
+					CFrame = targetLookCFrame
 				}):Play()
-				task.wait(1)
-				remote:FireServer("StoppedFiring", aimCF)
 			end)
+			remote:FireServer("Shoot", aimCF) 
 		end
 	elseif tool.Name == "BallerBattlerTool" or tool.Name=="SoccerBattlerTool" then
 		if aimCF then remote:FireServer("Shoot", aimCF * CFrame.new(0, 5, 0)) end
@@ -216,7 +245,7 @@ task.spawn(function()
 			if tool.Name == "BarbaricTool" then Button.Text = "Charge"
 			elseif tool.Name == "SpartanTool" then Button.Text = "Kick"
 			elseif tool.Name == "PukeTool" then Button.Text = "Puke"
-			elseif string.find(tool.Name, "Paintball") or string.find(tool.Name, "Rocket") or tool.Name == "StunnerTool" or tool.Name=="SlingerBattlerTool" or tool.Name=="CrocketBattlerTool" or tool.Name=="SniperTool" or tool.Name=="CupcakeLauncher" then Button.Text = "Fire"
+			elseif string.find(tool.Name, "Paintball") or string.find(tool.Name, "Rocket") or tool.Name == "StunnerTool" or tool.Name=="SlingerBattlerTool" or tool.Name=="CrocketBattlerTool" or tool.Name=="SniperTool" or tool.Name=="CupcakeLauncher"  or tool.Name=="BakerTool" or tool.Name=="FudgeTool" then Button.Text = "Fire"
 			elseif tool.Name == "GrenadeTool" or tool.Name=="ArsonTool" then Button.Text = "Throw"
 			elseif tool.Name == "BallerBattlerTool" or tool.Name=="SoccerBattlerTool"  then Button.Text = "Throw"
 			elseif tool.Name == "CakeTool" then Button.Text = CakeActive and "Punch" or "Cake"
