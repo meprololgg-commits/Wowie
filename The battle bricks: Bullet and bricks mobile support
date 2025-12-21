@@ -130,7 +130,7 @@ local function fireAbility()
 	elseif tool.Name == "CakeTool" and not CakeActive then
 		remote:FireServer("Ability")
 
-	elseif string.find(tool.Name, "Paintball") or string.find(tool.Name, "Rocket") or string.find(tool.Name, "Stunner") or string.find(tool.Name, "Crocket") or tool.Name=="SlingerBattlerTool" or tool.Name=="BakerTool" or tool.Name=="FudgeTool" or tool.Name=="CupcakeLauncher" or tool.Name == "BoxtrotTool" or tool.Name=="BirdshotTool" then
+	elseif string.find(tool.Name, "Paintball") or string.find(tool.Name, "Rocket") or string.find(tool.Name, "BigShot") or string.find(tool.Name, "Shankcut") or string.find(tool.Name, "Stunner") or string.find(tool.Name, "Crocket") or tool.Name=="SlingerBattlerTool" or tool.Name=="BakerTool" or tool.Name=="FudgeTool" or tool.Name=="CupcakeLauncher" or tool.Name == "BoxtrotTool" or tool.Name=="BirdshotTool" then
 		if aimCF then 
 			task.spawn(function()
 				if not (HumanoidRootPart and aimCF) then return end
@@ -245,7 +245,7 @@ task.spawn(function()
 			if tool.Name == "BarbaricTool" then Button.Text = "Charge"
 			elseif tool.Name == "SpartanTool" then Button.Text = "Kick"
 			elseif tool.Name == "PukeTool" then Button.Text = "Puke"
-			elseif string.find(tool.Name, "Paintball") or string.find(tool.Name, "Rocket") or tool.Name == "StunnerTool" or tool.Name=="SlingerBattlerTool" or tool.Name=="CrocketBattlerTool" or tool.Name=="SniperTool" or tool.Name=="CupcakeLauncher"  or tool.Name=="BakerTool" or tool.Name=="FudgeTool" or tool.Name == "BoxtrotTool" or tool.Name=="BirdshotTool" then Button.Text = "Fire"
+			elseif string.find(tool.Name, "Paintball") or string.find(tool.Name, "Rocket") or string.find(tool.Name, "BigShot") or string.find(tool.Name, "Shankcut") or tool.Name == "StunnerTool" or tool.Name=="SlingerBattlerTool" or tool.Name=="CrocketBattlerTool" or tool.Name=="SniperTool" or tool.Name=="CupcakeLauncher"  or tool.Name=="BakerTool" or tool.Name=="FudgeTool" or tool.Name == "BoxtrotTool" or tool.Name=="BirdshotTool" then Button.Text = "Fire"
 			elseif tool.Name == "GrenadeTool" or tool.Name=="ArsonTool" then Button.Text = "Throw"
 			elseif tool.Name == "BallerBattlerTool" or tool.Name=="SoccerBattlerTool"  then Button.Text = "Throw"
 			elseif tool.Name == "CakeTool" then Button.Text = CakeActive and "Punch" or "Cake"
@@ -257,6 +257,7 @@ task.spawn(function()
 		end
 	end
 end)
+
 
 
 
