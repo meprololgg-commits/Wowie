@@ -15,6 +15,7 @@ local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "AbilityUI"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = CoreGui
+
 local TweenService= game:GetService("TweenService")
 local HumanoidRootPart= char:WaitForChild("HumanoidRootPart")
 
@@ -58,11 +59,11 @@ local function getBestAimCFrame(targetHRP,tool)
 
 	local Velocity = targetHRP.AssemblyLinearVelocity --// Normally this would be their ping
 	local PredictedPosition = targetHRP.Position + Velocity * 0.2
-	local PredictedCFrame = CFrame.new(PredictedPosition) * (targetHRP.HumanoidRootPart.CFrame - targetHRP.HumanoidRootPart.Position)
+	local PredictedCFrame = CFrame.new(PredictedPosition) * (targetHRP.CFrame - targetHRP.Position)
 
 
 	local direction = (PredictedCFrame.Position - targetHRP.Position).Unit
-	
+
 	return CFrame.lookAt(origin, direction)
 end
 
@@ -255,9 +256,6 @@ task.spawn(function()
 		end
 	end
 end)
-
-
-
 
 
 
