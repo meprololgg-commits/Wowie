@@ -61,16 +61,7 @@ local function getBestAimCFrame(targetHRP,tool)
 	local PredictedPosition = targetHRP.Position + Velocity * 0.2
 	local PredictedCFrame = CFrame.new(PredictedPosition) * (targetHRP.CFrame - targetHRP.Position)
 
-
-	local direction = (PredictedCFrame.Position - targetHRP.Position).Unit
-
-	direction = direction + Vector3.new(
-		math.random(-12, 12)/100,
-		math.random(5, 25)/100,
-		math.random(-12, 12)/100
-	)
-
-	return CFrame.new(direction,origin)
+	return PredictedCFrame
 end
 
 
