@@ -56,12 +56,18 @@ local function getBestAimCFrame(targetHRP,tool)
 	local origin = HumanoidRootPart.Position
 	local targetPos = targetHRP.Position
 
+local velocity = targetHRP.Velocity
+	local predicted = targetPos + (velocity * 0.13)
 
-	local Velocity = targetHRP.AssemblyLinearVelocity --// Normally this would be their ping
-	local PredictedPosition = targetHRP.Position + Velocity * 0.2
-	local PredictedCFrame = CFrame.new(PredictedPosition) * (targetHRP.CFrame - targetHRP.Position)
 
-	return PredictedCFrame
+	predicted = predicted + Vector3.new(
+		math.random(-12, 12)/100,
+		math.random(5, 25)/100,
+		math.random(-12, 12)/100
+	)
+
+	return CFrame.lookAt(origin, predicted)
+	
 end
 
 
