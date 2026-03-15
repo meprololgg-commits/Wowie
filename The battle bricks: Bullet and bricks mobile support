@@ -70,7 +70,8 @@ local function getBestAimCFrame(targetHRP,tool)
 		math.random(-12, 12)/100
 	)
 
-	return CFrame.lookAt(origin, direction)
+	return CFrame.new(direction)
+
 end
 
 
