@@ -2,7 +2,10 @@ local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
-
+local RP= game:GetService("ReplicatedStorage")
+local Framework=RP:WaitForChild("Framework")
+local Connections=Framework:WaitForChild("Connections")
+local Abilities=Connections:WaitForChild("Abilities")
 local player = Players.LocalPlayer
 local char = player.Character or player.CharacterAdded:Wait()
 local hum = char:WaitForChild("Humanoid")
@@ -48,27 +51,29 @@ local function isEnemyTeam(p)
 end
 
 
-local function getBestAimCFrame(targetHRP,tool)
+local function getBestAimCFrame(targetHRP, toolName)
 	if not targetHRP then return nil end
-	local HumanoidRootPart = char:FindFirstChild("HumanoidRootPart")
-	if not HumanoidRootPart then return nil end
 
-	local origin = HumanoidRootPart.Position
-	local targetPos = targetHRP.Position
+	local myRoot = char:FindFirstChild("HumanoidRootPart")
+	if not myRoot then return nil end
 
-local velocity = targetHRP.Velocity
-	local predicted = targetPos + (velocity * 0.13)
+	local origin    = myRoot.Position
+	local targetPos = targetHRP.Position + Vector3.new(0, 2.6, 0)  
 
+	local velocity  = targetHRP.AssemblyLinearVelocity 
+	local leadTime = 0.2
 
-	predicted = predicted + Vector3.new(
-		math.random(-12, 12)/100,
-		math.random(5, 25)/100,
-		math.random(-12, 12)/100
+	local predictedPos = targetPos + velocity * leadTime
+
+	predictedPos = predictedPos + Vector3.new(
+		math.random(-14, 14) / 100,
+		math.random(4, 22) / 100,
+		math.random(-14, 14) / 100
 	)
 
-	return CFrame.lookAt(origin, predicted)
-	
+	return CFrame.lookAt(origin, predictedPos)
 end
+
 
 
 local function findClosestEnemy()
@@ -131,7 +136,18 @@ local function fireAbility()
 
 	elseif tool.Name == "CakeTool" and not CakeActive then
 		remote:FireServer("Ability")
-
+	elseif tool.Name == "PianistTool" then
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		if hrp then
+			local ray = workspace:Raycast(
+				hrp.Position,
+				(aimCF and (aimCF.Position - hrp.Position).Unit * 1000 or hrp.CFrame.LookVector * 1000),
+				RaycastParams.new()
+			)
+			if ray then
+				remote:FireServer("Attack", ray.Position)
+			end
+		end
 	elseif string.find(tool.Name, "Paintball") or string.find(tool.Name, "Rocket") or string.find(tool.Name, "BigShot") or string.find(tool.Name, "Shankcut") or string.find(tool.Name, "Stunner") or string.find(tool.Name, "Crocket") or tool.Name=="SlingerBattlerTool" or tool.Name=="BakerTool" or tool.Name=="FudgeTool" or tool.Name=="CupcakeLauncher" or tool.Name == "BoxtrotTool" or tool.Name=="BirdshotTool" then
 		if aimCF then 
 			task.spawn(function()
@@ -247,6 +263,7 @@ task.spawn(function()
 			if tool.Name == "BarbaricTool" then Button.Text = "Charge"
 			elseif tool.Name == "SpartanTool" then Button.Text = "Kick"
 			elseif tool.Name == "PukeTool" then Button.Text = "Puke"
+			elseif tool.Name=="PianistTool" then Button.Text="Play"
 			elseif string.find(tool.Name, "Paintball") or string.find(tool.Name, "Rocket") or string.find(tool.Name, "BigShot") or string.find(tool.Name, "Shankcut") or tool.Name == "StunnerTool" or tool.Name=="SlingerBattlerTool" or tool.Name=="CrocketBattlerTool" or tool.Name=="SniperTool" or tool.Name=="CupcakeLauncher"  or tool.Name=="BakerTool" or tool.Name=="FudgeTool" or tool.Name == "BoxtrotTool" or tool.Name=="BirdshotTool" then Button.Text = "Fire"
 			elseif tool.Name == "GrenadeTool" or tool.Name=="ArsonTool" then Button.Text = "Throw"
 			elseif tool.Name == "BallerBattlerTool" or tool.Name=="SoccerBattlerTool"  then Button.Text = "Throw"
