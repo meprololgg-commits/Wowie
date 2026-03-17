@@ -51,7 +51,7 @@ local function isEnemyTeam(p)
 end
 
 
-local function getBestAimCFrame(targetHRP, toolName)
+local function getBestAimCFrame(targetHRP, tool)
 	if not targetHRP then return nil end
 
 	local myRoot = char:FindFirstChild("HumanoidRootPart")
@@ -117,7 +117,7 @@ local function fireAbility()
 
 	local remote = tool:FindFirstChildOfClass("RemoteEvent")
 	local targetHRP = findClosestEnemy()
-	local aimCF = targetHRP and getBestAimCFrame(targetHRP)
+	local aimCF = targetHRP and getBestAimCFrame(targetHRP,tool)
 
 	if not remote then
 		if tool.Name == "SpeedsterTool" or tool.Name == "DarkBattlerTool" or (tool.Name == "CakeTool" and CakeActive) then
