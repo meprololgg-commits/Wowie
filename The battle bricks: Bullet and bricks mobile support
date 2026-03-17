@@ -68,6 +68,9 @@ local function getBestAimCFrame(targetHRP, toolName)
 	if string.find(toolName, "Paintball") then
         local distance  = (origin - targetPos).Magnitude
         leadTime=math.clamp(distance / 850, 0.5, 1.6)
+      elseif toolName=="Crossbow" or toolName=="Bow" then
+       local distance  = (origin - targetPos).Magnitude
+        leadTime=math.clamp(distance / 850, 0.5, 1.6)
 	end
 
 	local predictedPos = targetPos + velocity * leadTime
@@ -270,7 +273,7 @@ task.spawn(function()
 			elseif tool.Name == "SpartanTool" then Button.Text = "Kick"
 			elseif tool.Name == "PukeTool" then Button.Text = "Puke"
 			elseif tool.Name=="PianistTool" then Button.Text="Play"
-			elseif string.find(tool.Name, "Paintball") or string.find(tool.Name, "Rocket") or string.find(tool.Name, "BigShot") or string.find(tool.Name, "Shankcut") or tool.Name == "StunnerTool" or tool.Name=="SlingerBattlerTool" or tool.Name=="CrocketBattlerTool" or tool.Name=="SniperTool" or tool.Name=="CupcakeLauncher"  or tool.Name=="BakerTool" or tool.Name=="FudgeTool" or tool.Name == "BoxtrotTool" or tool.Name=="BirdshotTool" then Button.Text = "Fire"
+			elseif string.find(tool.Name, "Paintball") or string.find(tool.Name, "Rocket") or string.find(tool.Name, "BigShot") or tool.Name=="Crossbow" or tool.Name=="Bow" or string.find(tool.Name, "Shankcut") or tool.Name == "StunnerTool" or tool.Name=="SlingerBattlerTool" or tool.Name=="CrocketBattlerTool" or tool.Name=="SniperTool" or tool.Name=="CupcakeLauncher"  or tool.Name=="BakerTool" or tool.Name=="FudgeTool" or tool.Name == "BoxtrotTool" or tool.Name=="BirdshotTool" then Button.Text = "Fire"
 			elseif tool.Name == "GrenadeTool" or tool.Name=="ArsonTool" then Button.Text = "Throw"
 			elseif tool.Name == "BallerBattlerTool" or tool.Name=="SoccerBattlerTool"  then Button.Text = "Throw"
 			elseif tool.Name == "CakeTool" then Button.Text = CakeActive and "Punch" or "Cake"
