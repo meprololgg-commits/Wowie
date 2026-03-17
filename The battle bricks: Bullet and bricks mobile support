@@ -58,10 +58,17 @@ local function getBestAimCFrame(targetHRP, toolName)
 	if not myRoot then return nil end
 
 	local origin    = myRoot.Position
-	local targetPos = targetHRP.Position + Vector3.new(0, 0.4, 0)  
+	local targetPos = targetHRP.Position + Vector3.new(0, 0.4, 0)
 
-	local velocity  = targetHRP.AssemblyLinearVelocity 
-	local leadTime = 0.2
+	local velocity  = targetHRP.AssemblyLinearVelocity
+	
+	
+	local leadTime  = 0.3
+
+	if string.find(tool.Name, "Paintball") then
+        local distance  = (origin - targetPos).Magnitude
+        leadTime=math.clamp(distance / 850, 0.2, 1.0)
+	end
 
 	local predictedPos = targetPos + velocity * leadTime
 
@@ -73,7 +80,6 @@ local function getBestAimCFrame(targetHRP, toolName)
 
 	return CFrame.lookAt(origin, predictedPos)
 end
-
 
 
 local function findClosestEnemy()
