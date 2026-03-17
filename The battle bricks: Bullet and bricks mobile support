@@ -67,10 +67,10 @@ local function getBestAimCFrame(targetHRP, toolName)
 
 	if string.find(toolName, "Paintball") then
         local distance  = (origin - targetPos).Magnitude
-        leadTime=math.clamp(distance / 850, 0.3, 2.4)
+        leadTime=math.clamp(distance / 850, 0.3, 3.9)
       elseif toolName=="Crossbow" or toolName=="Bow" then
        local distance  = (origin - targetPos).Magnitude
-        leadTime=math.clamp(distance / 850, 0.5, 1.6)
+        leadTime=math.clamp(distance / 850, 0.5, 2.6)
 	end
 
 	local predictedPos = targetPos + velocity * leadTime
